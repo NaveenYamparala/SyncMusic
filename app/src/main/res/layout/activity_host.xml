@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".HostActivity">
+
+    <Button
+        android:id="@+id/UploadButton"
+        android:layout_width="285dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="26dp"
+        android:text="Upload Music to Play" />
+
+    <ProgressBar  android:indeterminate="true"
+        android:layout_centerInParent="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:id="@+id/progressBar"></ProgressBar>
+
+    <Button
+        android:id="@+id/PlayButton"
+        android:layout_width="285dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="26dp"
+        android:enabled="false"
+        android:text="Play" />
+
+    <Button
+        android:id="@+id/PauseButton"
+        android:layout_width="281dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="46dp"
+        android:layout_marginTop="108dp"
+        android:enabled="false"
+        android:text="Pause" />
+
+    <SeekBar
+        android:id="@+id/scrubber"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="50dp" />
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="50dp" />
+
+</LinearLayout>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".OptionsActivity">
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:text="Choose an Option"
+        android:textColor="@android:color/holo_blue_dark"
+        android:textSize="100px" />
+
+    <Button
+        android:id="@+id/hostButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Host a Music Party" />
+
+    <Button
+        android:id="@+id/joinButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Join a Music Party" />
+</LinearLayout>

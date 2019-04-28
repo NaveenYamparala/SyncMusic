@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "890312926742",
+    "firebase_url": "https://syncmusic-d0f62.firebaseio.com",
+    "project_id": "syncmusic-d0f62",
+    "storage_bucket": "syncmusic-d0f62.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:890312926742:android:32783527a74e398e",
+        "android_client_info": {
+          "package_name": "com.example.syncmusic"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "890312926742-3dd52afl6b48s8i7dvcr1u7e1vo0mua1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.syncmusic",
+            "certificate_hash": "070a11fe2577589c3b84d864d33d4bf0d139f9cd"
+          }
+        },
+        {
+          "client_id": "890312926742-gmv5smos53kj5e3cfef15e6ns2e72t7p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEyn9Rp8juESBvRToi4SDlCZ7akbJMBzA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "890312926742-gmv5smos53kj5e3cfef15e6ns2e72t7p.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
