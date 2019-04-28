@@ -132,8 +132,8 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
                 stream = null;
                 stream = getContentResolver().openInputStream(musicURI);
                 String mimeType = getContentResolver().getType(musicURI);
-                String fileExtension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
-                fileRef = mStorageRef.child( uid+ "/" +fileName+"."+fileExtension);
+               // String fileExtension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
+                fileRef = mStorageRef.child( uid+ "/" +fileName);
             } catch (Exception e) {
                 e.getMessage();
             }
