@@ -26,6 +26,7 @@ public class OptionsActivity extends AppCompatActivity implements View.OnClickLi
         uid = getIntent().getExtras().getString("userid");
         userObj = getIntent().getExtras().get("userObj");
         hostButton.setOnClickListener(this);
+        joinButton.setOnClickListener(this);
     }
 
     @Override
@@ -44,8 +45,8 @@ public class OptionsActivity extends AppCompatActivity implements View.OnClickLi
                 startActivity(i);
                 break;
             case R.id.joinButton:
-//                Intent intent = new Intent(getApplicationContext(),HostActivity.class);
-//                startActivity(intent);
+                Intent intent = new Intent(getApplicationContext(),JoinActivity.class);
+                startActivity(intent);
                 break;
         }
     }

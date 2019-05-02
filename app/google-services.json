@@ -23,6 +23,14 @@
           }
         },
         {
+          "client_id": "890312926742-8fkjlkmcrs48mtu69h31okti7uc62fk4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.syncmusic",
+            "certificate_hash": "0409cda79f825141c3794a5d0059aaed38035f8c"
+          }
+        },
+        {
           "client_id": "890312926742-gmv5smos53kj5e3cfef15e6ns2e72t7p.apps.googleusercontent.com",
           "client_type": 3
         }
