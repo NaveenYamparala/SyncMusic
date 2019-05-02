@@ -1,7 +1,10 @@
 package com.example.syncmusic;
 
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -84,10 +87,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if(task.isSuccessful()) {
                     finish();
                     Toast.makeText(getApplicationContext(), "Login Successful", Toast.LENGTH_SHORT).show();
-                    Intent i = new Intent(MainActivity.this, OptionsActivity.class);
-                    i.putExtra("name",mAuth.getCurrentUser().getDisplayName());
-                    i.putExtra("userid",mAuth.getCurrentUser().getUid());
-                    startActivity(i);
+                    try {
+                        Intent i = new Intent(MainActivity.this, OptionsActivity.class);
+                        i.putExtra("name", mAuth.getCurrentUser().getDisplayName());
+                        i.putExtra("userid", mAuth.getCurrentUser().getUid());
+                        i.putExtra("userObj", new UserInfo(mAuth.getCurrentUser().getUid(), mAuth.getCurrentUser().getDisplayName(), null));
+                        startActivity(i);
+                    }
+                    catch (Exception ex){
+                        throw ex;
+                    }
                 }
                 else {
                     Toast.makeText(getApplicationContext(), task.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -96,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
     }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()){

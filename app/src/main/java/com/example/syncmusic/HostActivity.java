@@ -21,6 +21,9 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -31,19 +34,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.TreeMap;
 
 public class HostActivity extends AppCompatActivity implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
     private MediaPlayer mediaPlayer;
     private AudioManager audioManager;
     private Button playButton, pauseButton, uploadButton;
     private SeekBar volumeSeekBar, scrubControl;
-    private StorageReference mStorageRef,fileRef;
+    private StorageReference mStorageRef, fileRef;
     private int Music_Choose = 1;
     Uri musicURI;
-    private FirebaseAuth mAuth;
-    private String fileName,fileUploadPath,uid;
+    UserInfo currentUser;
+    private String fileName, fileUploadPath, uid;
     InputStream stream;
     private ProgressBar progressBar;
+    private DatabaseReference activeUsersReference;
+    private Timer myTimer;
 
 
     @Override
@@ -51,7 +57,8 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_host);
 
-        mAuth = FirebaseAuth.getInstance();
+        activeUsersReference = FirebaseDatabase.getInstance().getReference("ActiveUsers");
+        currentUser = (UserInfo)getIntent().getExtras().get("userObj");
         playButton = findViewById(R.id.PlayButton);
         pauseButton = findViewById(R.id.PauseButton);
         uploadButton = findViewById(R.id.UploadButton);
@@ -72,19 +79,26 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
         volumeSeekBar.setOnSeekBarChangeListener(this);
 
         //get values from intent
-        Intent intent = new Intent();
         uid = getIntent().getExtras().getString("userid");
 
     }
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.PlayButton:
-                mediaPlayer.start();
+                if (currentUser != null) {
+                    scheduleTimer();
+                    mediaPlayer.start();
+                    playButton.setEnabled(false);
+                }
                 break;
             case R.id.PauseButton:
                 mediaPlayer.pause();
+                playButton.setEnabled(true);
+                if(myTimer != null){
+                    myTimer.cancel();
+                }
                 break;
             case R.id.UploadButton:
                 uploadMusic();
@@ -96,15 +110,15 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
     private void uploadMusic() {
         Intent myIntent = new Intent(Intent.ACTION_GET_CONTENT);
         myIntent.setType("audio/*");
-        startActivityForResult(myIntent,Music_Choose);
+        startActivityForResult(myIntent, Music_Choose);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == Music_Choose && resultCode == RESULT_OK){
+        if (requestCode == Music_Choose && resultCode == RESULT_OK) {
             musicURI = data.getData();
-            if(mediaPlayer != null && mediaPlayer.isPlaying()) {
+            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
                 mediaPlayer.stop();
             }
         }
@@ -127,13 +141,13 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
         /*End - Code to get file name*/
 
         /*Start - File Upload*/
-        if(fileName != null) {
+        if (fileName != null) {
             try {
                 stream = null;
                 stream = getContentResolver().openInputStream(musicURI);
-                String mimeType = getContentResolver().getType(musicURI);
-               // String fileExtension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
-                fileRef = mStorageRef.child( uid+ "/" +fileName);
+                //String mimeType = getContentResolver().getType(musicURI);
+                // String fileExtension = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
+                fileRef = mStorageRef.child(uid + "/" + fileName);
             } catch (Exception e) {
                 e.getMessage();
             }
@@ -161,8 +175,7 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
                     pauseButton.setEnabled(true);
                 }
             });
-        }
-        else{
+        } else {
             return;
         }
         /*End - File Upload*/
@@ -176,31 +189,45 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
             try {
                 mediaPlayer.setDataSource(this, uri); // Set the data source of the audio
                 mediaPlayer.prepare(); // Preparing audio file, to get data like audio length etc.
+                mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mp) {
+                        if(myTimer != null){
+                            myTimer.cancel();
+                        }
+                        playButton.setEnabled(true);
+                    }
+                });
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
             scrubControl.setMax(mediaPlayer.getDuration());
-            new Timer().scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    scrubControl.setProgress(mediaPlayer.getCurrentPosition());
-                }
-            }, 0, 1000);
-
             scrubControl.setOnSeekBarChangeListener(this);
         }
     }
 
-    /* Override methods of Volume bar and Scrubber*/
+    // To update DB as well as seekbar continously about the status of the song.
+    public void scheduleTimer() {
+        myTimer = new Timer();
+        myTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                updateActiveUsers(Integer.toString(mediaPlayer.getCurrentPosition()));
+                scrubControl.setProgress(mediaPlayer.getCurrentPosition());
+            }
+        }, 0, 1000);
+    }
+
+    /*Start - Override methods of Volume bar and Scrubber*/
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        switch (seekBar.getId()){
+        switch (seekBar.getId()) {
             case R.id.seekBar:
-                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,progress,0);
+                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0);
                 break;
             case R.id.scrubber:
-                if(fromUser){
+                if (fromUser) {
                     mediaPlayer.seekTo(progress);
                 }
                 break;
@@ -218,13 +245,25 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
     public void onStopTrackingTouch(SeekBar seekBar) {
 
     }
+    /*End - Override methods of Volume bar and Scrubber*/
+
+    public void updateActiveUsers(String currentSeekTime) {
+        ActiveUsers activeUsers = new ActiveUsers(new UserInfo(currentUser.getUid(), currentUser.getDisplayName(), null), fileUploadPath, currentSeekTime);
+        activeUsersReference.child(uid).setValue(activeUsers);
+    }
 
     @Override
     protected void onStop() {
-        if(mediaPlayer!=null){
+        if (mediaPlayer != null) {
             mediaPlayer.pause();
         }
 
         super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        myTimer.cancel();
     }
 }

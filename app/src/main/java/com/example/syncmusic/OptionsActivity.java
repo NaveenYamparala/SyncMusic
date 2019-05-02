@@ -1,6 +1,7 @@
 package com.example.syncmusic;
 
 import android.content.Intent;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -13,7 +14,7 @@ public class OptionsActivity extends AppCompatActivity implements View.OnClickLi
     private FirebaseAuth mAuth;
     private Button hostButton,joinButton;
     private String uid;
-
+    private Object userObj = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -22,8 +23,8 @@ public class OptionsActivity extends AppCompatActivity implements View.OnClickLi
         hostButton = findViewById(R.id.hostButton);
         joinButton = findViewById(R.id.joinButton);
 
-        Intent i = new Intent();
         uid = getIntent().getExtras().getString("userid");
+        userObj = getIntent().getExtras().get("userObj");
         hostButton.setOnClickListener(this);
     }
 
@@ -39,6 +40,7 @@ public class OptionsActivity extends AppCompatActivity implements View.OnClickLi
             case R.id.hostButton:
                 Intent i = new Intent(getApplicationContext(),HostActivity.class);
                 i.putExtra("userid",uid);
+                i.putExtra("userObj", (Parcelable) userObj);
                 startActivity(i);
                 break;
             case R.id.joinButton:
