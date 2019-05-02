@@ -50,6 +50,7 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
     private ProgressBar progressBar;
     private DatabaseReference activeUsersReference;
     private Timer myTimer;
+    Boolean IsBackButtonPressed = false;
 
 
     @Override
@@ -81,6 +82,11 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
         //get values from intent
         uid = getIntent().getExtras().getString("userid");
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     @Override
@@ -253,17 +259,26 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    protected void onStop() {
-//        if (mediaPlayer != null) {
-//            mediaPlayer.pause();
-//        }
+    public void onBackPressed()
+    {
+        if (mediaPlayer != null) {
+            mediaPlayer.pause();
+        }
+        IsBackButtonPressed = true;
+       // moveTaskToBack(true);
+        super.onBackPressed();  // optional depending on your needs
 
+    }
+    @Override
+    protected void onStop() {
         super.onStop();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        myTimer.cancel();
+        if(!IsBackButtonPressed) {
+            myTimer.cancel();
+        }
     }
 }
