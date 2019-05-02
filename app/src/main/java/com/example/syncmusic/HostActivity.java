@@ -254,9 +254,9 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onStop() {
-        if (mediaPlayer != null) {
-            mediaPlayer.pause();
-        }
+//        if (mediaPlayer != null) {
+//            mediaPlayer.pause();
+//        }
 
         super.onStop();
     }
