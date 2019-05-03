@@ -28,10 +28,14 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import org.apache.commons.net.ntp.NTPUDPClient;
+import org.apache.commons.net.ntp.TimeInfo;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
@@ -172,11 +176,11 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
                         @Override
                         public void onSuccess(Uri uri) {
                             fileUploadPath = uri.toString();
+                            Toast.makeText(HostActivity.this, "Upload Successful", Toast.LENGTH_LONG).show();
                             progressBar.setVisibility(View.GONE);
                             prepareMusicPlayer();
                         }
                     });
-                    Toast.makeText(HostActivity.this, "Upload Successful", Toast.LENGTH_LONG).show();
                     playButton.setEnabled(true);
                     pauseButton.setEnabled(true);
                 }
@@ -219,10 +223,20 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
         myTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                updateActiveUsers(Integer.toString(mediaPlayer.getCurrentPosition()));
+                String TIME_SERVER = "time-a.nist.gov";
+                NTPUDPClient timeClient = new NTPUDPClient();
+                try {
+                InetAddress inetAddress = InetAddress.getByName(TIME_SERVER);
+                TimeInfo timeInfo = null;
+                timeInfo = timeClient.getTime(inetAddress);
+                long returnTime = timeInfo.getMessage().getTransmitTimeStamp().getTime();
+                updateActiveUsers(Integer.toString(mediaPlayer.getCurrentPosition()),returnTime);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 scrubControl.setProgress(mediaPlayer.getCurrentPosition());
             }
-        }, 0, 1000);
+        }, 0, 250);
     }
 
     /*Start - Override methods of Volume bar and Scrubber*/
@@ -253,8 +267,8 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
     }
     /*End - Override methods of Volume bar and Scrubber*/
 
-    public void updateActiveUsers(String currentSeekTime) {
-        ActiveUsers activeUsers = new ActiveUsers(new UserInfo(currentUser.getUid(), currentUser.getDisplayName(), null), fileUploadPath, currentSeekTime);
+    public void updateActiveUsers(String currentSeekTime,long time) {
+        ActiveUsers activeUsers = new ActiveUsers(new UserInfo(currentUser.getUid(), currentUser.getDisplayName(), String.valueOf(time)), fileUploadPath, currentSeekTime);
         activeUsersReference.child(uid).setValue(activeUsers);
     }
 
