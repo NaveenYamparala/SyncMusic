@@ -38,6 +38,7 @@ public class JoinActivity extends AppCompatActivity {
     private List<ActiveUsers> userlist_;
     private ListView userlistview_;
     MediaPlayer mediaPlayer;
+    public long startTime,endTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +70,8 @@ public class JoinActivity extends AppCompatActivity {
                 userlistview_.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                       ActiveUsers selectedItem = (ActiveUsers) userlistview_.getItemAtPosition(position);
+                        startTime = System.currentTimeMillis();
+                        ActiveUsers selectedItem = (ActiveUsers) userlistview_.getItemAtPosition(position);
                        playMusic(selectedItem);
                     }
                 });
@@ -93,7 +95,9 @@ public class JoinActivity extends AppCompatActivity {
                 try {
                     mediaPlayer.setDataSource(this, uri); // Set the data source of the audio
                     mediaPlayer.prepare(); // Preparing audio file, to get data like audio length etc.
-                    int anticipatedSeek = Integer.parseInt(selectedItem.getCurrentSeekTime()) + 2000;
+                    endTime = System.currentTimeMillis();
+                    long delay = endTime - startTime;
+                    int anticipatedSeek = Integer.parseInt(selectedItem.getCurrentSeekTime()) + 2600;
                     if(mediaPlayer.getDuration() > anticipatedSeek) {
                         mediaPlayer.seekTo(anticipatedSeek);
                         long time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(selectedItem.getLastUpdated()).getTime() + 2000;

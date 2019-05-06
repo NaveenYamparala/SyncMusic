@@ -36,6 +36,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
@@ -55,6 +56,7 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
     private DatabaseReference activeUsersReference;
     private Timer myTimer;
     Boolean IsBackButtonPressed = false;
+    private long start,end;
 
 
     @Override
@@ -223,6 +225,7 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
         myTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
+                //start = System.currentTimeMillis();
                 String TIME_SERVER = "time-a.nist.gov";
                 NTPUDPClient timeClient = new NTPUDPClient();
                 try {
@@ -231,12 +234,15 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
                 timeInfo = timeClient.getTime(inetAddress);
                 long returnTime = timeInfo.getMessage().getTransmitTimeStamp().getTime();
                 updateActiveUsers(Integer.toString(mediaPlayer.getCurrentPosition()),returnTime);
+               // end = System.currentTimeMillis();
+                //long delay = end - start;
+               // System.out.println("Timer task started at:"+new Date() + "Delay :"+delay);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 scrubControl.setProgress(mediaPlayer.getCurrentPosition());
             }
-        }, 0, 250);
+        }, 0, 1000);
     }
 
     /*Start - Override methods of Volume bar and Scrubber*/
