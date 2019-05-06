@@ -2,9 +2,11 @@ package com.example.syncmusic;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.OpenableColumns;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,6 +16,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.Toast;
@@ -44,19 +47,21 @@ import java.util.TreeMap;
 public class HostActivity extends AppCompatActivity implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
     private MediaPlayer mediaPlayer;
     private AudioManager audioManager;
-    private Button playButton, pauseButton, uploadButton;
+    private Button playButton, pauseButton, uploadButton, loadButton;
     private SeekBar volumeSeekBar, scrubControl;
     private StorageReference mStorageRef, fileRef;
     private int Music_Choose = 1;
     Uri musicURI;
     UserInfo currentUser;
-    private String fileName, fileUploadPath, uid;
+    private String fileName, fileUploadPath, uid, linkUrl;
     InputStream stream;
     private ProgressBar progressBar;
     private DatabaseReference activeUsersReference;
     private Timer myTimer;
     Boolean IsBackButtonPressed = false;
     private long start,end;
+    private EditText linkEditText;
+
 
 
     @Override
@@ -75,6 +80,19 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
         playButton.setOnClickListener(this);
         pauseButton.setOnClickListener(this);
         uploadButton.setOnClickListener(this);
+        linkEditText = findViewById(R.id.linkEditText);
+        loadButton = findViewById(R.id.loadButton);
+        loadButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                linkUrl = linkEditText.getText().toString();
+                if(!TextUtils.isEmpty(linkUrl)) {
+                    fileUploadPath = linkUrl;
+                    prepareMusicPlayer(fileUploadPath);
+                    playButton.setEnabled(true);
+                }
+            }
+        });
 
 
         volumeSeekBar = findViewById(R.id.seekBar);
@@ -115,6 +133,7 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.UploadButton:
                 uploadMusic();
                 break;
+
         }
     }
 
@@ -180,7 +199,7 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
                             fileUploadPath = uri.toString();
                             Toast.makeText(HostActivity.this, "Upload Successful", Toast.LENGTH_LONG).show();
                             progressBar.setVisibility(View.GONE);
-                            prepareMusicPlayer();
+                            prepareMusicPlayer(fileUploadPath);
                         }
                     });
                     playButton.setEnabled(true);
@@ -194,12 +213,21 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    public void prepareMusicPlayer() {
+    public void prepareMusicPlayer(String fileUploadPath) {
         if (!TextUtils.isEmpty(fileUploadPath)) {
             Uri uri = Uri.parse(fileUploadPath);
             mediaPlayer = new MediaPlayer();
             try {
                 mediaPlayer.setDataSource(this, uri); // Set the data source of the audio
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_MEDIA)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .setLegacyStreamType(AudioManager.STREAM_MUSIC)
+                            .build());
+                } else {
+                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                }
                 mediaPlayer.prepare(); // Preparing audio file, to get data like audio length etc.
                 mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                     @Override
@@ -219,7 +247,7 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    // To update DB as well as seekbar continously about the status of the song.
+    // To update DB as well as seekbar continuously about the status of the song.
     public void scheduleTimer() {
         myTimer = new Timer();
         myTimer.scheduleAtFixedRate(new TimerTask() {
