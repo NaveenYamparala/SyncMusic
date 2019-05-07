@@ -38,7 +38,10 @@ public class JoinActivity extends AppCompatActivity {
     private List<ActiveUsers> userlist_;
     private ListView userlistview_;
     MediaPlayer mediaPlayer;
-    public long startTime,endTime;
+    public long startTime, endTime;
+    private String selectedUserID;
+    private Boolean proceed = true;
+    private int count = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,21 +61,39 @@ public class JoinActivity extends AppCompatActivity {
         userref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
+                startTime = System.currentTimeMillis();
                 userlist_.clear();
-
-                for(DataSnapshot user:dataSnapshot.getChildren()){
-                    userlist_.add(user.getValue(ActiveUsers.class)); //returns an object of type users rather than a generic object
-
+                for (DataSnapshot user : dataSnapshot.getChildren()) {
+                    ActiveUsers activeUsers = user.getValue(ActiveUsers.class);
+                    if (activeUsers.getUid().equals(selectedUserID)) {
+                        if (mediaPlayer != null) {
+                            endTime = System.currentTimeMillis();
+                            int s = Math.abs(Integer.parseInt(activeUsers.getCurrentSeekTime()) - mediaPlayer.getCurrentPosition());
+                            if (s > 100 && proceed) {
+                                count++;
+                                int delay = Integer.parseInt(String.valueOf(endTime - startTime));
+                                mediaPlayer.seekTo(Integer.parseInt(activeUsers.getCurrentSeekTime()) + delay);
+//                                if(count > 3){
+//                                    proceed = false;
+//                                }
+                            }
+                            if(s < 50){
+                                proceed = false;
+                            }
+                        }
+                    }
+                    userlist_.add(activeUsers); //returns an object of type users rather than a generic object
                 }
                 UserInfoList adapter = new UserInfoList(JoinActivity.this, userlist_);
                 userlistview_.setAdapter(adapter);
                 userlistview_.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        startTime = System.currentTimeMillis();
+                        count =0;
+                        proceed = true;
                         ActiveUsers selectedItem = (ActiveUsers) userlistview_.getItemAtPosition(position);
-                       playMusic(selectedItem);
+                        selectedUserID = selectedItem.getUid();
+                        playMusic(selectedItem);
                     }
                 });
             }
@@ -85,28 +106,25 @@ public class JoinActivity extends AppCompatActivity {
     }
 
     private void playMusic(ActiveUsers selectedItem) {
-            String fileUploadPath = selectedItem.getCurrentSong();
-            if (!TextUtils.isEmpty(fileUploadPath)) {
-                Uri uri = Uri.parse(fileUploadPath);
-                if(mediaPlayer != null && mediaPlayer.isPlaying()){
-                    mediaPlayer.stop();
+        String fileUploadPath = selectedItem.getCurrentSong();
+        if (!TextUtils.isEmpty(fileUploadPath)) {
+            Uri uri = Uri.parse(fileUploadPath);
+            if (mediaPlayer != null && mediaPlayer.isPlaying()) {
+                mediaPlayer.stop();
+            }
+            mediaPlayer = new MediaPlayer();
+            try {
+                mediaPlayer.setDataSource(this, uri); // Set the data source of the audio
+                mediaPlayer.prepare(); // Preparing audio file, to get data like audio length etc.
+                int anticipatedSeek = Integer.parseInt(selectedItem.getCurrentSeekTime()) + 2600;
+                if (mediaPlayer.getDuration() > anticipatedSeek) {
+                    mediaPlayer.seekTo(anticipatedSeek);
+                    long time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(selectedItem.getLastUpdated()).getTime() + 2000;
+                    scheduleTimer(time);
+                } else {
+                    Toast.makeText(getApplicationContext(), "Song ended!", Toast.LENGTH_LONG).show();
+                    return;
                 }
-                mediaPlayer = new MediaPlayer();
-                try {
-                    mediaPlayer.setDataSource(this, uri); // Set the data source of the audio
-                    mediaPlayer.prepare(); // Preparing audio file, to get data like audio length etc.
-                    endTime = System.currentTimeMillis();
-                    long delay = endTime - startTime;
-                    int anticipatedSeek = Integer.parseInt(selectedItem.getCurrentSeekTime()) + 2600;
-                    if(mediaPlayer.getDuration() > anticipatedSeek) {
-                        mediaPlayer.seekTo(anticipatedSeek);
-                        long time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(selectedItem.getLastUpdated()).getTime() + 2000;
-                        scheduleTimer(time);
-                    }
-                    else{
-                        Toast.makeText(getApplicationContext(),"Song ended!",Toast.LENGTH_LONG).show();
-                        return;
-                    }
 
 //                    mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 //                        @Override
@@ -117,16 +135,16 @@ public class JoinActivity extends AppCompatActivity {
 //                            playButton.setEnabled(true);
 //                        }
 //                    });
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
 
 //                scrubControl.setMax(mediaPlayer.getDuration());
 //                scrubControl.setOnSeekBarChangeListener(this);
-            }
         }
+    }
 
     public void scheduleTimer(final long t) throws IOException {
         final Timer myTimer = new Timer();
@@ -140,9 +158,9 @@ public class JoinActivity extends AppCompatActivity {
                     TimeInfo timeInfo = null;
                     timeInfo = timeClient.getTime(inetAddress);
                     long returnTime = timeInfo.getMessage().getTransmitTimeStamp().getTime();
-                    if(returnTime >= t) {
+                    if (returnTime >= t) {
                         mediaPlayer.start();
-                        if(!mediaPlayer.isPlaying()){
+                        if (!mediaPlayer.isPlaying()) {
                             mediaPlayer.start();
                         }
                         myTimer.cancel();

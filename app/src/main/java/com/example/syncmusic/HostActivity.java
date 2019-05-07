@@ -47,13 +47,13 @@ import java.util.TreeMap;
 public class HostActivity extends AppCompatActivity implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
     private MediaPlayer mediaPlayer;
     private AudioManager audioManager;
-    private Button playButton, pauseButton, uploadButton, loadButton;
+    private Button playButton, pauseButton, uploadButton,loadButton;
     private SeekBar volumeSeekBar, scrubControl;
     private StorageReference mStorageRef, fileRef;
     private int Music_Choose = 1;
     Uri musicURI;
     UserInfo currentUser;
-    private String fileName, fileUploadPath, uid, linkUrl;
+    private String fileName, fileUploadPath, uid,linkUrl;
     InputStream stream;
     private ProgressBar progressBar;
     private DatabaseReference activeUsersReference;
@@ -70,7 +70,7 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_host);
 
         activeUsersReference = FirebaseDatabase.getInstance().getReference("ActiveUsers");
-        currentUser = (UserInfo)getIntent().getExtras().get("userObj");
+        currentUser = (UserInfo) getIntent().getExtras().get("userObj");
         playButton = findViewById(R.id.PlayButton);
         pauseButton = findViewById(R.id.PauseButton);
         uploadButton = findViewById(R.id.UploadButton);
@@ -133,7 +133,6 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.UploadButton:
                 uploadMusic();
                 break;
-
         }
     }
 
@@ -247,7 +246,7 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    // To update DB as well as seekbar continuously about the status of the song.
+    // To update DB as well as seekbar continously about the status of the song.
     public void scheduleTimer() {
         myTimer = new Timer();
         myTimer.scheduleAtFixedRate(new TimerTask() {
@@ -257,14 +256,18 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
                 String TIME_SERVER = "time-a.nist.gov";
                 NTPUDPClient timeClient = new NTPUDPClient();
                 try {
-                InetAddress inetAddress = InetAddress.getByName(TIME_SERVER);
-                TimeInfo timeInfo = null;
-                timeInfo = timeClient.getTime(inetAddress);
-                long returnTime = timeInfo.getMessage().getTransmitTimeStamp().getTime();
-                updateActiveUsers(Integer.toString(mediaPlayer.getCurrentPosition()),returnTime);
-               // end = System.currentTimeMillis();
-                //long delay = end - start;
-               // System.out.println("Timer task started at:"+new Date() + "Delay :"+delay);
+                    start = System.currentTimeMillis();
+                    InetAddress inetAddress = InetAddress.getByName(TIME_SERVER);
+                    TimeInfo timeInfo = null;
+                    timeInfo = timeClient.getTime(inetAddress);
+                    long returnTime = timeInfo.getMessage().getTransmitTimeStamp().getTime();
+                    end = System.currentTimeMillis();
+                    System.out.println(" Delay Time :" + (end-start));
+                    start = System.currentTimeMillis();
+                    updateActiveUsers(Integer.toString(mediaPlayer.getCurrentPosition()), returnTime);
+                    end = System.currentTimeMillis();
+                    long delay = end - start;
+                    System.out.println(" Delay DB :" + delay);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -301,22 +304,22 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
     }
     /*End - Override methods of Volume bar and Scrubber*/
 
-    public void updateActiveUsers(String currentSeekTime,long time) {
+    public void updateActiveUsers(String currentSeekTime, long time) {
         ActiveUsers activeUsers = new ActiveUsers(new UserInfo(currentUser.getUid(), currentUser.getDisplayName(), String.valueOf(time)), fileUploadPath, currentSeekTime);
         activeUsersReference.child(uid).setValue(activeUsers);
     }
 
     @Override
-    public void onBackPressed()
-    {
+    public void onBackPressed() {
         if (mediaPlayer != null) {
             mediaPlayer.pause();
         }
         IsBackButtonPressed = true;
-       // moveTaskToBack(true);
+        // moveTaskToBack(true);
         super.onBackPressed();  // optional depending on your needs
 
     }
+
     @Override
     protected void onStop() {
         super.onStop();
