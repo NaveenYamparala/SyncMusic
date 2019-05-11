@@ -7,10 +7,19 @@
     android:background="@color/cream"
     tools:context=".JoinActivity">
 
+    <ImageView
+        android:id="@+id/LoginBackground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/background_four"
+
+        />
 
 
     <ListView
         android:id="@+id/userlistview"
+        android:textColor="@color/white"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
 
