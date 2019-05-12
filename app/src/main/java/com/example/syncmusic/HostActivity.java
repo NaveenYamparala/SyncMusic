@@ -5,16 +5,17 @@ import android.database.Cursor;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.PlaybackParams;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.OpenableColumns;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
-import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -23,8 +24,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -35,33 +34,35 @@ import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Timer;
-import java.util.TimerTask;
-import java.util.TreeMap;
 
 public class HostActivity extends AppCompatActivity implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
     private MediaPlayer mediaPlayer;
     private AudioManager audioManager;
-    private Button playButton, pauseButton, uploadButton,loadButton;
+    private Button playButton, pauseButton, uploadButton, loadButton;
     private SeekBar volumeSeekBar, scrubControl;
     private StorageReference mStorageRef, fileRef;
     private int Music_Choose = 1;
     Uri musicURI;
     UserInfo currentUser;
-    private String fileName, fileUploadPath, uid,linkUrl;
+    private String fileName, fileUploadPath, uid, linkUrl;
     InputStream stream;
     private ProgressBar progressBar;
     private DatabaseReference activeUsersReference;
     private Timer myTimer;
     Boolean IsBackButtonPressed = false;
-    private long start,end;
+    private long start, end;
     private EditText linkEditText;
-
+    private int count =0;
+    private boolean updateDB;
+    private Thread t;
+    DateFormat simple;
 
 
     @Override
@@ -82,18 +83,7 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
         uploadButton.setOnClickListener(this);
         linkEditText = findViewById(R.id.linkEditText);
         loadButton = findViewById(R.id.loadButton);
-        loadButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                linkUrl = linkEditText.getText().toString();
-                if(!TextUtils.isEmpty(linkUrl)) {
-                    fileUploadPath = linkUrl;
-                    prepareMusicPlayer(fileUploadPath);
-                    playButton.setEnabled(true);
-                }
-            }
-        });
-
+        loadButton.setOnClickListener(this);
 
         volumeSeekBar = findViewById(R.id.seekBar);
         scrubControl = findViewById(R.id.scrubber);
@@ -105,6 +95,7 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
 
         //get values from intent
         uid = getIntent().getExtras().getString("userid");
+        simple = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
     }
 
@@ -118,26 +109,63 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()) {
             case R.id.PlayButton:
                 if (currentUser != null) {
-                    scheduleTimer();
-                    mediaPlayer.start();
+                    updateDB = true;
+//                    mediaPlayer.start();
+                    try {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            mediaPlayer.setPlaybackParams(new PlaybackParams().setSpeed(1.0f));
+                        }
+                    }
+                    catch (Exception ex){
+                        throw ex;
+                    }
+                    UpdateDatabase();
                     playButton.setEnabled(false);
+                    pauseButton.setEnabled(true);
                 }
                 break;
             case R.id.PauseButton:
+                updateDB = false;
                 mediaPlayer.pause();
+                pauseButton.setEnabled(false);
                 playButton.setEnabled(true);
-                if(myTimer != null){
+                if (myTimer != null) {
                     myTimer.cancel();
                 }
                 break;
             case R.id.UploadButton:
                 uploadMusic();
                 break;
+            case R.id.loadButton:
+                if(mediaPlayer != null){
+                    mediaPlayer.stop();
+                }
+                if(t != null && t.isAlive()){
+                    updateDB = false;
+                }
+                progressBar.setVisibility(View.VISIBLE);
+                linkUrl = linkEditText.getText().toString();
+                if (!TextUtils.isEmpty(linkUrl)) {
+                    fileUploadPath = linkUrl;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        prepareMusicPlayer(fileUploadPath);
+                    }
+                }
+                break;
         }
     }
 
 
     private void uploadMusic() {
+        if(mediaPlayer != null){
+            mediaPlayer.stop();
+        }
+        if(myTimer != null){
+            myTimer.cancel();
+        }
+        if(t != null && t.isAlive()){
+            updateDB = false;
+        }
         Intent myIntent = new Intent(Intent.ACTION_GET_CONTENT);
         myIntent.setType("audio/*");
         startActivityForResult(myIntent, Music_Choose);
@@ -146,6 +174,9 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if(data == null){
+            return;
+        }
         if (requestCode == Music_Choose && resultCode == RESULT_OK) {
             musicURI = data.getData();
             if (mediaPlayer != null && mediaPlayer.isPlaying()) {
@@ -197,12 +228,12 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
                         public void onSuccess(Uri uri) {
                             fileUploadPath = uri.toString();
                             Toast.makeText(HostActivity.this, "Upload Successful", Toast.LENGTH_LONG).show();
-                            progressBar.setVisibility(View.GONE);
-                            prepareMusicPlayer(fileUploadPath);
+                            //progressBar.setVisibility(View.GONE);
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                prepareMusicPlayer(fileUploadPath);
+                            }
                         }
                     });
-                    playButton.setEnabled(true);
-                    pauseButton.setEnabled(true);
                 }
             });
         } else {
@@ -216,6 +247,8 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
         if (!TextUtils.isEmpty(fileUploadPath)) {
             Uri uri = Uri.parse(fileUploadPath);
             mediaPlayer = new MediaPlayer();
+            playButton.setEnabled(false);
+            pauseButton.setEnabled(false);
             try {
                 mediaPlayer.setDataSource(this, uri); // Set the data source of the audio
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -228,52 +261,92 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
                     mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 }
                 mediaPlayer.prepare(); // Preparing audio file, to get data like audio length etc.
+                mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                    @Override
+                    public void onPrepared(MediaPlayer mp) {
+                        progressBar.setVisibility(View.GONE);
+                        playButton.setEnabled(true);
+                        scrubControl.setMax(mediaPlayer.getDuration());
+                        scrubControl.setOnSeekBarChangeListener(HostActivity.this);
+
+                    }
+                });
                 mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                     @Override
                     public void onCompletion(MediaPlayer mp) {
-                        if(myTimer != null){
+                        if (myTimer != null) {
                             myTimer.cancel();
                         }
+                        System.out.println(" Song Ending Time :" + System.currentTimeMillis());
+                        updateDB = false;
                         playButton.setEnabled(true);
+
                     }
                 });
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-            scrubControl.setMax(mediaPlayer.getDuration());
-            scrubControl.setOnSeekBarChangeListener(this);
         }
     }
 
     // To update DB as well as seekbar continously about the status of the song.
-    public void scheduleTimer() {
-        myTimer = new Timer();
-        myTimer.scheduleAtFixedRate(new TimerTask() {
+    public void UpdateDatabase() {
+        t = new Thread(String.valueOf(Thread.MAX_PRIORITY)) {
             @Override
             public void run() {
-                //start = System.currentTimeMillis();
-                String TIME_SERVER = "time-a.nist.gov";
-                NTPUDPClient timeClient = new NTPUDPClient();
-                try {
-                    start = System.currentTimeMillis();
-                    InetAddress inetAddress = InetAddress.getByName(TIME_SERVER);
-                    TimeInfo timeInfo = null;
-                    timeInfo = timeClient.getTime(inetAddress);
-                    long returnTime = timeInfo.getMessage().getTransmitTimeStamp().getTime();
-                    end = System.currentTimeMillis();
-                    System.out.println(" Delay Time :" + (end-start));
-                    start = System.currentTimeMillis();
-                    updateActiveUsers(Integer.toString(mediaPlayer.getCurrentPosition()), returnTime);
-                    end = System.currentTimeMillis();
-                    long delay = end - start;
-                    System.out.println(" Delay DB :" + delay);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                super.run();
+                while (updateDB) {
+                    long returnTime = 0;
+                    String TIME_SERVER = "time.google.com";
+                    NTPUDPClient timeClient = new NTPUDPClient();
+                    try {
+                        start = System.currentTimeMillis();
+                        InetAddress inetAddress = InetAddress.getByName(TIME_SERVER);
+                        TimeInfo timeInfo = null;
+                        timeInfo = timeClient.getTime(inetAddress);
+                        returnTime = timeInfo.getMessage().getTransmitTimeStamp().getTime();
+                        end = System.currentTimeMillis();
+                        //System.out.println(" Time server Time :" + (end - start) + "; Count :" + count++);
+                        System.out.println("System Time: " + end);
+                        System.out.println("Song current seek time: "+ mediaPlayer.getCurrentPosition());
+                        System.out.println("Estimated song time: "+ String.valueOf(mediaPlayer.getCurrentPosition() + 5000));
+                        System.out.println("Estimated Time to start: " + simple.format(new Date(returnTime+5000)));
+                        System.out.println("Song Duration: " + mediaPlayer.getDuration());
+
+                        long st = System.currentTimeMillis();
+                        ActiveUsers activeUsers = new ActiveUsers(new UserInfo(currentUser.getUid(), currentUser.getDisplayName(), currentUser.getLastUpdated()), fileUploadPath, String.valueOf(mediaPlayer.getCurrentPosition()),simple.format(new Date(returnTime+5000)),String.valueOf(mediaPlayer.getCurrentPosition() + 5000));
+                        activeUsersReference.child(uid).setValue(activeUsers);
+                        long e = System.currentTimeMillis();
+                        System.out.println(" DB Time : " + (e - st));
+                        scrubControl.setProgress(mediaPlayer.getCurrentPosition());
+                        Thread.sleep(1000);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
-                scrubControl.setProgress(mediaPlayer.getCurrentPosition());
             }
-        }, 0, 1000);
+        };
+        t.start();
+//        Thread t1 = new Thread(String.valueOf(Thread.MAX_PRIORITY)) {
+//            @Override
+//            public void run() {
+//                super.run();
+//                Boolean bool = true;
+//                while (bool){
+//                    System.out.println("Time: " + System.currentTimeMillis());
+//                    System.out.println("Song current seek time: "+ mediaPlayer.getCurrentPosition());
+//                    try {
+//                        Thread.sleep(100);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//        };
+//        t1.start();
     }
 
     /*Start - Override methods of Volume bar and Scrubber*/
@@ -304,15 +377,14 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
     }
     /*End - Override methods of Volume bar and Scrubber*/
 
-    public void updateActiveUsers(String currentSeekTime, long time) {
-        ActiveUsers activeUsers = new ActiveUsers(new UserInfo(currentUser.getUid(), currentUser.getDisplayName(), String.valueOf(time)), fileUploadPath, currentSeekTime);
-        activeUsersReference.child(uid).setValue(activeUsers);
-    }
-
     @Override
     public void onBackPressed() {
         if (mediaPlayer != null) {
-            mediaPlayer.pause();
+            mediaPlayer.stop();
+            updateDB = false;
+            if(myTimer != null){
+                myTimer.cancel();
+            }
         }
         IsBackButtonPressed = true;
         // moveTaskToBack(true);
@@ -328,8 +400,13 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(!IsBackButtonPressed) {
+        if (!IsBackButtonPressed) {
             myTimer.cancel();
         }
+
+        if(t != null && t.isAlive()) {
+            updateDB = false;
+        }
     }
+
 }
