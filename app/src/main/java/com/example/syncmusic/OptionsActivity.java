@@ -15,7 +15,7 @@ import com.google.firebase.auth.FirebaseAuth;
 public class OptionsActivity extends AppCompatActivity implements View.OnClickListener {
 
     private FirebaseAuth mAuth;
-    private Button hostButton,joinButton;
+    private Button hostButton,joinButton, signoutButton;
     private String uid;
     private Object userObj = null;
     private ImageView LoginBackground;
@@ -26,6 +26,7 @@ public class OptionsActivity extends AppCompatActivity implements View.OnClickLi
         mAuth = FirebaseAuth.getInstance();
         hostButton = findViewById(R.id.hostButton);
         joinButton = findViewById(R.id.joinButton);
+        signoutButton = findViewById(R.id.signoutButton);
         LoginBackground = findViewById(R.id.LoginBackground);
 
         /*Bitmap bitmap = BitmapFactory.decodeResource(getResources(),R.drawable.background_two);
@@ -35,6 +36,7 @@ public class OptionsActivity extends AppCompatActivity implements View.OnClickLi
         userObj = getIntent().getExtras().get("userObj");
         hostButton.setOnClickListener(this);
         joinButton.setOnClickListener(this);
+        signoutButton.setOnClickListener(this);
     }
 
     @Override
@@ -55,6 +57,11 @@ public class OptionsActivity extends AppCompatActivity implements View.OnClickLi
             case R.id.joinButton:
                 Intent intent = new Intent(getApplicationContext(),JoinActivity.class);
                 startActivity(intent);
+                break;
+            case R.id.signoutButton:
+                mAuth.signOut();
+                finish();
+                startActivity(new Intent(this,MainActivity.class));
                 break;
         }
     }
