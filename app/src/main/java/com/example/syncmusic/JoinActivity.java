@@ -13,6 +13,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -46,6 +47,7 @@ public class JoinActivity extends AppCompatActivity {
     public long startTime, endTime;
     private String selectedUserID;
     private Boolean proceed = true;
+    private TextView noUserAlert;
     private int count = 0;
     DateFormat simple;
 
@@ -59,6 +61,7 @@ public class JoinActivity extends AppCompatActivity {
 
         userref = FirebaseDatabase.getInstance().getReference("ActiveUsers");
         userlistview_ = (ListView) findViewById(R.id.userlistview);
+        noUserAlert = findViewById(R.id.noUserAlert);
     }
 
     @Override
@@ -73,36 +76,43 @@ public class JoinActivity extends AppCompatActivity {
                 for (DataSnapshot user : dataSnapshot.getChildren()) {
 
                     ActiveUsers activeUsers = user.getValue(ActiveUsers.class);
-                       if (activeUsers.getUid().equals(selectedUserID)) {
+                    if (activeUsers.getUid().equals(selectedUserID)) {
                         if (mediaPlayer.isPlaying()) {
                             endTime = System.currentTimeMillis();
                             int seekDiff = Integer.parseInt(activeUsers.getCurrentSeekTime()) - mediaPlayer.getCurrentPosition();
-                            System.out.println("seekDiff value: "+seekDiff);
-                            if(seekDiff > 0 && proceed){
+                            System.out.println("seekDiff value: " + seekDiff);
+                            if (seekDiff > 0 && proceed) {
                                 count++;
-                                mediaPlayer.seekTo(Integer.parseInt(activeUsers.getCurrentSeekTime())+seekDiff);
+                                mediaPlayer.seekTo(Integer.parseInt(activeUsers.getCurrentSeekTime()) + seekDiff/2);
                             }
-                            if(count > 2){
+                            if (count > 2) {
                                 proceed = false;
                             }
                         }
                     }
                     userlist_.add(activeUsers); //returns an object of type users rather than a generic object
                 }
-                UserInfoList adapter = new UserInfoList(JoinActivity.this, userlist_);
-                userlistview_.setAdapter(adapter);
-                userlistview_.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        count = 0;
-                        proceed = true;
-                        ActiveUsers selectedItem = (ActiveUsers) userlistview_.getItemAtPosition(position);
-                        System.out.println("Anticipated Time to start :"+selectedItem.getAnticipatedSongStartTime());
-                        System.out.println("Anticipated seek time :"+selectedItem.getAnticipatedSeekTime());
-                        selectedUserID = selectedItem.getUid();
-                        playMusic(selectedItem);
-                    }
-                });
+                if (userlist_.isEmpty()) {
+                    userlistview_.setVisibility(View.GONE);
+                    noUserAlert.setVisibility(View.VISIBLE);
+                } else {
+                    userlistview_.setVisibility(View.VISIBLE);
+                    noUserAlert.setVisibility(View.GONE);
+                    UserInfoList adapter = new UserInfoList(JoinActivity.this, userlist_);
+                    userlistview_.setAdapter(adapter);
+                    userlistview_.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            count = 0;
+                            proceed = true;
+                            ActiveUsers selectedItem = (ActiveUsers) userlistview_.getItemAtPosition(position);
+                            System.out.println("Anticipated Time to start :" + selectedItem.getAnticipatedSongStartTime());
+                            System.out.println("Anticipated seek time :" + selectedItem.getAnticipatedSeekTime());
+                            selectedUserID = selectedItem.getUid();
+                            playMusic(selectedItem);
+                        }
+                    });
+                }
             }
 
             @Override
@@ -132,7 +142,7 @@ public class JoinActivity extends AppCompatActivity {
                     mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 }
                 mediaPlayer.prepare(); // Preparing audio file, to get data like audio length etc.
-                mediaPlayer.seekTo(Integer.parseInt(selectedItem.getAnticipatedSeekTime())+ 100);
+                mediaPlayer.seekTo(Integer.parseInt(selectedItem.getAnticipatedSeekTime()) + 100);
                 long time = simple.parse(selectedItem.getAnticipatedSongStartTime()).getTime();
                 scheduleTimer(time);
                 mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {

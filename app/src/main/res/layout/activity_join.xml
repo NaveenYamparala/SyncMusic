@@ -15,7 +15,6 @@
         android:src="@drawable/background_four"
 
         />
-
     <TextView
         android:id="@+id/joinTextView"
         android:layout_width="match_parent"
@@ -30,24 +29,39 @@
         android:textSize="25sp"
         android:textStyle="bold" />
 
-
-    <ListView
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="50dp"
+    <TextView
+        android:id="@+id/noUserAlert"
+        android:layout_width="400dp"
+        android:layout_height="34dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:id="@+id/userlistview"
+        android:enabled="true"
+        android:textSize="25sp"
         android:textColor="@color/white"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:textAlignment="center"
+        android:visibility="visible"
+        android:text="No Active users hosting a party now!"
+        app:layout_constraintBottom_toBottomOf="@+id/userlistview"
+        app:layout_constraintEnd_toEndOf="@+id/LoginBackground"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/LoginBackground"
+        app:layout_constraintTop_toTopOf="@+id/joinTextView"
+        app:layout_constraintVertical_bias="0.051"
+        tools:text="No Active users hosting a party now!" />
+
+    <ListView
+        android:id="@+id/userlistview"
+        android:layout_width="355dp"
+        android:layout_height="619dp"
+        android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintHorizontal_bias="0.486"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.269"
 
-        />
+        app:layout_constraintTop_toTopOf="@+id/LoginBackground"
+        app:layout_constraintVertical_bias="1.0" />
 
 </android.support.constraint.ConstraintLayout>

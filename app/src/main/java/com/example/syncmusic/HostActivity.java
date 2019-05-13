@@ -219,7 +219,6 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
                         @Override
                         public void onSuccess(Uri uri) {
                             fileUploadPath = uri.toString();
-                            Toast.makeText(HostActivity.this, "Upload Successful", Toast.LENGTH_LONG).show();
                             //progressBar.setVisibility(View.GONE);
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                                 prepareMusicPlayer(fileUploadPath);
@@ -260,7 +259,7 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
                         playButton.setEnabled(true);
                         scrubControl.setMax(mediaPlayer.getDuration());
                         scrubControl.setOnSeekBarChangeListener(HostActivity.this);
-
+                        Toast.makeText(HostActivity.this, "Loading Successful. Ready to play.", Toast.LENGTH_LONG).show();
                     }
                 });
                 mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -269,7 +268,7 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
                         System.out.println(" Song Ending Time :" + System.currentTimeMillis());
                         updateDB = false;
                         playButton.setEnabled(true);
-
+                        activeUsersReference.child(uid).removeValue();
                     }
                 });
             } catch (IOException e) {
