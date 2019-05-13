@@ -142,9 +142,9 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
                 linkUrl = linkEditText.getText().toString();
                 if (!TextUtils.isEmpty(linkUrl)) {
                     fileUploadPath = linkUrl;
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         prepareMusicPlayer(fileUploadPath);
-                    }
+                    //}
                 }
                 break;
         }
