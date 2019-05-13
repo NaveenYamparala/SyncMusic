@@ -4,14 +4,15 @@
     android:descendantFocusability="blocksDescendants"
     android:layout_height="match_parent">
 
-    <EditText
+    <TextView
         android:id="@+id/editTextDisplayName"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:textColor="@color/white"
+        android:layout_height="31dp"
         android:layout_weight="1"
-        android:inputType="textPersonName" />
+        android:inputType="textPersonName"
+        android:textColor="@color/white"
+        android:textSize="22sp"
+        android:textStyle="bold" />
 
     <Button
         android:id="@+id/joinButton"

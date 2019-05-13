@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class UserInfoList extends ArrayAdapter<ActiveUsers> {
         LayoutInflater inflater = context_.getLayoutInflater();
         View listviewItem = inflater.inflate(R.layout.listview_item, null, true);
 
-        EditText DisplayName = (EditText) listviewItem.findViewById(R.id.editTextDisplayName);
+        TextView DisplayName = (TextView) listviewItem.findViewById(R.id.editTextDisplayName);
 
         ActiveUsers tmp_ = userslist_.get(position);
         DisplayName.setText(tmp_.getDisplayName());
