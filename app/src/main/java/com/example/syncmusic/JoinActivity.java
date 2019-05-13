@@ -73,32 +73,20 @@ public class JoinActivity extends AppCompatActivity {
                 for (DataSnapshot user : dataSnapshot.getChildren()) {
 
                     ActiveUsers activeUsers = user.getValue(ActiveUsers.class);
-//                    if (activeUsers.getUid().equals(selectedUserID)) {
-//                        if (mediaPlayer.isPlaying()) {
-//                            endTime = System.currentTimeMillis();
-//                            int hostPosition = Integer.parseInt(activeUsers.getCurrentSeekTime());
-//                            int ourPosition = mediaPlayer.getCurrentPosition();
-//                            int s = Integer.parseInt(activeUsers.getCurrentSeekTime()) - mediaPlayer.getCurrentPosition();
-//                            int delay = Integer.parseInt(String.valueOf(endTime - startTime));
-//                            System.out.println(" Host :" + hostPosition);
-//                            System.out.println(" Our :" + ourPosition);
-//                            System.out.println(" Delay :" + delay);
-//                            System.out.println(" s :" + s);
-//                            if (proceed) {
-//                                if(s>150) {
-//                                    count++;
-//                                    mediaPlayer.seekTo(Integer.parseInt(activeUsers.getCurrentSeekTime()) + s);
-//                                }
-//                                if(s<0){
-//                                    count++;
-//                                    mediaPlayer.seekTo(Integer.parseInt(activeUsers.getCurrentSeekTime()) - s);
-//                                }
-//                                if(count > 3){
-//                                    proceed = false;
-//                                }
-//                            }
-//                        }
-//                    }
+                       if (activeUsers.getUid().equals(selectedUserID)) {
+                        if (mediaPlayer.isPlaying()) {
+                            endTime = System.currentTimeMillis();
+                            int seekDiff = Integer.parseInt(activeUsers.getCurrentSeekTime()) - mediaPlayer.getCurrentPosition();
+                            System.out.println("seekDiff value: "+seekDiff);
+                            if(seekDiff > 0 && proceed){
+                                count++;
+                                mediaPlayer.seekTo(Integer.parseInt(activeUsers.getCurrentSeekTime())+seekDiff);
+                            }
+                            if(count > 2){
+                                proceed = false;
+                            }
+                        }
+                    }
                     userlist_.add(activeUsers); //returns an object of type users rather than a generic object
                 }
                 UserInfoList adapter = new UserInfoList(JoinActivity.this, userlist_);
@@ -144,7 +132,7 @@ public class JoinActivity extends AppCompatActivity {
                     mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 }
                 mediaPlayer.prepare(); // Preparing audio file, to get data like audio length etc.
-                mediaPlayer.seekTo(Integer.parseInt(selectedItem.getAnticipatedSeekTime()));
+                mediaPlayer.seekTo(Integer.parseInt(selectedItem.getAnticipatedSeekTime())+ 100);
                 long time = simple.parse(selectedItem.getAnticipatedSongStartTime()).getTime();
                 scheduleTimer(time);
                 mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -186,15 +174,15 @@ public class JoinActivity extends AppCompatActivity {
                 endTime = System.currentTimeMillis();
                 //System.out.println("Timer running..Delay =" + (endTime -startTime) );
                 if (returnTime >= t) {
-//                    mediaPlayer.start();
-                    try {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            mediaPlayer.setPlaybackParams(new PlaybackParams().setSpeed(1.0f));
-                        }
-                    }
-                    catch (Exception ex){
-                        throw ex;
-                    }
+                    mediaPlayer.start();
+//                    try {
+//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                            mediaPlayer.setPlaybackParams(new PlaybackParams().setSpeed(1.0f));
+//                        }
+//                    }
+//                    catch (Exception ex){
+//                        throw ex;
+//                    }
                     System.out.println("Song start time :" + simple.format(returnTime) + "Song current Duration :" + mediaPlayer.getCurrentPosition());
                     myTimer.cancel();
                 }
