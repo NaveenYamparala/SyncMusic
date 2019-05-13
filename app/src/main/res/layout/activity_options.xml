@@ -75,6 +75,19 @@
                 android:text=" Join a music party"
                 android:textColor="@color/white"
                 android:textStyle="normal" />
+            <Button
+                android:id="@+id/signoutButton"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/register_blue_button"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:text="Sign out"
+                android:textColor="@color/white"
+                android:textStyle="normal" />
 
 
             <ProgressBar
@@ -102,18 +115,7 @@
 
         />
 
-    <Button
-        android:id="@+id/signoutButton"
-        android:background="@color/signout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="287dp"
-        android:layout_marginLeft="287dp"
-        android:layout_marginTop="14dp"
-        android:text="Signout" />
+
 </RelativeLayout>
 
 
