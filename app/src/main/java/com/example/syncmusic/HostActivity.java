@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -55,11 +56,8 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
     InputStream stream;
     private ProgressBar progressBar;
     private DatabaseReference activeUsersReference;
-    private Timer myTimer;
     Boolean IsBackButtonPressed = false;
-    private long start, end;
     private EditText linkEditText;
-    private int count =0;
     private boolean updateDB;
     private Thread t;
     DateFormat simple;
@@ -110,15 +108,15 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.PlayButton:
                 if (currentUser != null) {
                     updateDB = true;
-//                    mediaPlayer.start();
-                    try {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            mediaPlayer.setPlaybackParams(new PlaybackParams().setSpeed(1.0f));
-                        }
-                    }
-                    catch (Exception ex){
-                        throw ex;
-                    }
+                    mediaPlayer.start();
+//                    try {
+//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                            mediaPlayer.setPlaybackParams(new PlaybackParams().setSpeed(1.0f));
+//                        }
+//                    }
+//                    catch (Exception ex){
+//                        throw ex;
+//                    }
                     UpdateDatabase();
                     playButton.setEnabled(false);
                     pauseButton.setEnabled(true);
@@ -129,9 +127,6 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
                 mediaPlayer.pause();
                 pauseButton.setEnabled(false);
                 playButton.setEnabled(true);
-                if (myTimer != null) {
-                    myTimer.cancel();
-                }
                 break;
             case R.id.UploadButton:
                 uploadMusic();
@@ -159,9 +154,6 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
     private void uploadMusic() {
         if(mediaPlayer != null){
             mediaPlayer.stop();
-        }
-        if(myTimer != null){
-            myTimer.cancel();
         }
         if(t != null && t.isAlive()){
             updateDB = false;
@@ -274,9 +266,6 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
                 mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                     @Override
                     public void onCompletion(MediaPlayer mp) {
-                        if (myTimer != null) {
-                            myTimer.cancel();
-                        }
                         System.out.println(" Song Ending Time :" + System.currentTimeMillis());
                         updateDB = false;
                         playButton.setEnabled(true);
@@ -301,22 +290,21 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
                     String TIME_SERVER = "time.google.com";
                     NTPUDPClient timeClient = new NTPUDPClient();
                     try {
-                        start = System.currentTimeMillis();
                         InetAddress inetAddress = InetAddress.getByName(TIME_SERVER);
                         TimeInfo timeInfo = null;
                         timeInfo = timeClient.getTime(inetAddress);
                         returnTime = timeInfo.getMessage().getTransmitTimeStamp().getTime();
-                        end = System.currentTimeMillis();
-                        //System.out.println(" Time server Time :" + (end - start) + "; Count :" + count++);
-                        System.out.println("System Time: " + end);
+                        System.out.println("System Time: " + System.currentTimeMillis());
                         System.out.println("Song current seek time: "+ mediaPlayer.getCurrentPosition());
-                        System.out.println("Estimated song time: "+ String.valueOf(mediaPlayer.getCurrentPosition() + 5000));
-                        System.out.println("Estimated Time to start: " + simple.format(new Date(returnTime+5000)));
+                        System.out.println("Estimated song time: "+ String.valueOf(mediaPlayer.getCurrentPosition() + 2000));
+                        System.out.println("Estimated Time to start: " + simple.format(new Date(returnTime + 2000)));
                         System.out.println("Song Duration: " + mediaPlayer.getDuration());
 
                         long st = System.currentTimeMillis();
-                        ActiveUsers activeUsers = new ActiveUsers(new UserInfo(currentUser.getUid(), currentUser.getDisplayName(), currentUser.getLastUpdated()), fileUploadPath, String.valueOf(mediaPlayer.getCurrentPosition()),simple.format(new Date(returnTime+5000)),String.valueOf(mediaPlayer.getCurrentPosition() + 5000));
+
+                        ActiveUsers activeUsers = new ActiveUsers(new UserInfo(currentUser.getUid(), currentUser.getDisplayName(), currentUser.getLastUpdated()), fileUploadPath, String.valueOf(mediaPlayer.getCurrentPosition()),simple.format(new Date(returnTime+2000)),String.valueOf(mediaPlayer.getCurrentPosition() + 2000));
                         activeUsersReference.child(uid).setValue(activeUsers);
+
                         long e = System.currentTimeMillis();
                         System.out.println(" DB Time : " + (e - st));
                         scrubControl.setProgress(mediaPlayer.getCurrentPosition());
@@ -330,23 +318,6 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
             }
         };
         t.start();
-//        Thread t1 = new Thread(String.valueOf(Thread.MAX_PRIORITY)) {
-//            @Override
-//            public void run() {
-//                super.run();
-//                Boolean bool = true;
-//                while (bool){
-//                    System.out.println("Time: " + System.currentTimeMillis());
-//                    System.out.println("Song current seek time: "+ mediaPlayer.getCurrentPosition());
-//                    try {
-//                        Thread.sleep(100);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
-//        };
-//        t1.start();
     }
 
     /*Start - Override methods of Volume bar and Scrubber*/
@@ -381,10 +352,8 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
     public void onBackPressed() {
         if (mediaPlayer != null) {
             mediaPlayer.stop();
+            activeUsersReference.child(uid).removeValue();
             updateDB = false;
-            if(myTimer != null){
-                myTimer.cancel();
-            }
         }
         IsBackButtonPressed = true;
         // moveTaskToBack(true);
@@ -400,10 +369,6 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (!IsBackButtonPressed) {
-            myTimer.cancel();
-        }
-
         if(t != null && t.isAlive()) {
             updateDB = false;
         }
