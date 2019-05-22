@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@drawable/navy_back_1"
+        android:src="@drawable/grey_background"
 
         />
 
@@ -52,7 +52,7 @@
         android:layout_width="match_parent"
         android:enabled="true"
         android:textSize="25sp"
-        android:textColor="@color/black"
+        android:textColor="@color/white"
         android:textAlignment="center"
         android:visibility="visible"
         android:text="No Active users hosting a party!"

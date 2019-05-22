@@ -6,7 +6,7 @@
             <stroke android:width="0.1dp"
                 android:color="@color/white"/>
             <corners
-                android:radius="40dp"/>
+                android:radius="0dp"/>
         </shape>
     </item>
 </selector>
