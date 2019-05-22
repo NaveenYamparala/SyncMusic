@@ -132,21 +132,20 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
                 uploadMusic();
                 break;
             case R.id.loadButton:
-                if(mediaPlayer != null){
+                if (mediaPlayer != null) {
                     mediaPlayer.stop();
                 }
-                if(t != null && t.isAlive()){
+                if (t != null && t.isAlive()) {
                     updateDB = false;
                 }
                 linkUrl = linkEditText.getText().toString();
                 if (!TextUtils.isEmpty(linkUrl) && URLUtil.isValidUrl(linkUrl)) {
                     fileUploadPath = linkUrl;
                     //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        prepareMusicPlayer(fileUploadPath);
+                    prepareMusicPlayer(fileUploadPath);
                     //}
-                }
-                else{
-                    Toast.makeText(getApplicationContext(),"Please enter a valid URL",Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Please enter a valid URL", Toast.LENGTH_LONG).show();
                 }
                 break;
         }
@@ -154,10 +153,10 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
 
 
     private void uploadMusic() {
-        if(mediaPlayer != null){
+        if (mediaPlayer != null) {
             mediaPlayer.stop();
         }
-        if(t != null && t.isAlive()){
+        if (t != null && t.isAlive()) {
             updateDB = false;
         }
         Intent myIntent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -168,7 +167,7 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(data == null){
+        if (data == null) {
             return;
         }
         if (requestCode == Music_Choose && resultCode == RESULT_OK) {
@@ -222,9 +221,9 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
                         public void onSuccess(Uri uri) {
                             fileUploadPath = uri.toString();
                             //progressBar.setVisibility(View.GONE);
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                prepareMusicPlayer(fileUploadPath);
-                            }
+                            //if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            prepareMusicPlayer(fileUploadPath);
+                            //}
                         }
                     });
                 }
@@ -278,7 +277,7 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public boolean onError(MediaPlayer mp, int what, int extra) {
                         progressBar.setVisibility(View.GONE);
-                        Toast.makeText(getApplicationContext(),"An error has occurred!.Please make sure the link is of valid music file.",Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "An error has occurred!.Please make sure the link is of valid music file.", Toast.LENGTH_LONG).show();
                         return false;
                     }
                 });
@@ -315,7 +314,7 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
 
 //                        ActiveUsers activeUsers = new ActiveUsers(new UserInfo(currentUser.getUid(), currentUser.getDisplayName(), currentUser.getLastUpdated()), fileUploadPath, String.valueOf(mediaPlayer.getCurrentPosition()),simpleDtFormat.format(new Date(returnTime+2000)),String.valueOf(mediaPlayer.getCurrentPosition() + 2000));
 //                        activeUsersReference.child(uid).setValue(activeUsers);
-                        ActiveUsers activeUsers = new ActiveUsers(new UserInfo(currentUser.getUid(), currentUser.getDisplayName(), currentUser.getLastUpdated()), fileUploadPath, String.valueOf(mediaPlayer.getCurrentPosition()), simpleDtFormat.format(new Date(returnTime+2000)),String.valueOf(mediaPlayer.getCurrentPosition() + 2000));
+                        ActiveUsers activeUsers = new ActiveUsers(new UserInfo(currentUser.getUid(), currentUser.getDisplayName(), currentUser.getLastUpdated()), fileUploadPath, String.valueOf(mediaPlayer.getCurrentPosition()), simpleDtFormat.format(new Date(returnTime + 2000)), String.valueOf(mediaPlayer.getCurrentPosition() + 2000));
                         activeUsersReference.child(uid).setValue(activeUsers);
                         long e = System.currentTimeMillis();
                         System.out.println(" DB Time : " + (e - st));
@@ -392,7 +391,7 @@ public class HostActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(t != null && t.isAlive()) {
+        if (t != null && t.isAlive()) {
             updateDB = false;
         }
     }

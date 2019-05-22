@@ -82,11 +82,11 @@ public class JoinActivity extends AppCompatActivity {
                             endTime = System.currentTimeMillis();
                             int seekDiff = Integer.parseInt(activeUsers.getCurrentSeekTime()) - mediaPlayer.getCurrentPosition();
                             System.out.println("seekDiff value: " + seekDiff);
-                            if (seekDiff > 0 && proceed) {
+                            if (seekDiff > 50 && proceed) {
                                 count++;
-                                mediaPlayer.seekTo(Integer.parseInt(activeUsers.getCurrentSeekTime())+seekDiff/10);
+                                mediaPlayer.seekTo(Integer.parseInt(activeUsers.getCurrentSeekTime())+seekDiff/2);// Akash - seekdiff/2
                             }
-                            if (count > 2) {
+                            if (count > 3) {
                                 proceed = false;
                             }
                         }
@@ -149,9 +149,10 @@ public class JoinActivity extends AppCompatActivity {
                     mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 }
                 mediaPlayer.prepare(); // Preparing audio file, to get data like audio length etc.
-                mediaPlayer.seekTo(Integer.parseInt(selectedItem.getAnticipatedSeekTime()) + 100);
+                mediaPlayer.seekTo(Integer.parseInt(selectedItem.getAnticipatedSeekTime()));
                 long time = simple.parse(selectedItem.getAnticipatedSongStartTime()).getTime();
-                scheduleTimer(time);
+                //scheduleTimer(time);
+                mediaPlayer.start();
                 mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                     @Override
                     public void onCompletion(MediaPlayer mp) {
@@ -166,48 +167,48 @@ public class JoinActivity extends AppCompatActivity {
         }
     }
 
-    public void scheduleTimer(final long t) throws IOException {
-        final Timer myTimer = new Timer();
-        myTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-//                String TIME_SERVER = "time-a.nist.gov";
-//                startTime = System.currentTimeMillis();
-//                String TIME_SERVER = "time.google.com";
-//                NTPUDPClient timeClient = new NTPUDPClient();
-//                InetAddress inetAddress = null;
-//                try {
-//                    inetAddress = InetAddress.getByName(TIME_SERVER);
-//                } catch (UnknownHostException e) {
-//                    e.printStackTrace();
+//    public void scheduleTimer(final long t) throws IOException {
+//        final Timer myTimer = new Timer();
+//        myTimer.scheduleAtFixedRate(new TimerTask() {
+//            @Override
+//            public void run() {
+////                String TIME_SERVER = "time-a.nist.gov";
+////                startTime = System.currentTimeMillis();
+////                String TIME_SERVER = "time.google.com";
+////                NTPUDPClient timeClient = new NTPUDPClient();
+////                InetAddress inetAddress = null;
+////                try {
+////                    inetAddress = InetAddress.getByName(TIME_SERVER);
+////                } catch (UnknownHostException e) {
+////                    e.printStackTrace();
+////                }
+////                TimeInfo timeInfo = null;
+////                try {
+////                    timeInfo = timeClient.getTime(inetAddress);
+////                } catch (IOException e) {
+////                    e.printStackTrace();
+////                }
+//               // long returnTime = timeInfo.getMessage().getTransmitTimeStamp().getTime();
+//                long returnTime = System.currentTimeMillis();
+//                endTime = System.currentTimeMillis();
+//                //System.out.println("Timer running..Delay =" + (endTime -startTime) );
+//                if (returnTime >= t) {
+//                    mediaPlayer.start();
+////                    try {
+////                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+////                            mediaPlayer.setPlaybackParams(new PlaybackParams().setSpeed(1.0f));
+////                        }
+////                    }
+////                    catch (Exception ex){
+////                        throw ex;
+////                    }
+//                    System.out.println("Song start time :" + simple.format(returnTime) + "Song current Duration :" + mediaPlayer.getCurrentPosition());
+//                    myTimer.cancel();
 //                }
-//                TimeInfo timeInfo = null;
-//                try {
-//                    timeInfo = timeClient.getTime(inetAddress);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-               // long returnTime = timeInfo.getMessage().getTransmitTimeStamp().getTime();
-                long returnTime = System.currentTimeMillis();
-                endTime = System.currentTimeMillis();
-                //System.out.println("Timer running..Delay =" + (endTime -startTime) );
-                if (returnTime >= t) {
-                    mediaPlayer.start();
-//                    try {
-//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//                            mediaPlayer.setPlaybackParams(new PlaybackParams().setSpeed(1.0f));
-//                        }
-//                    }
-//                    catch (Exception ex){
-//                        throw ex;
-//                    }
-                    System.out.println("Song start time :" + simple.format(returnTime) + "Song current Duration :" + mediaPlayer.getCurrentPosition());
-                    myTimer.cancel();
-                }
-
-            }
-        }, 0, 10);
-    }
+//
+//            }
+//        }, 0, 10);
+//    }
 
     @Override
     protected void onDestroy() {
