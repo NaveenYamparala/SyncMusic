@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@drawable/background_four"
+        android:src="@drawable/navy_back_1"
 
         />
 
@@ -52,7 +52,7 @@
         android:layout_width="match_parent"
         android:enabled="true"
         android:textSize="25sp"
-        android:textColor="@color/white"
+        android:textColor="@color/black"
         android:textAlignment="center"
         android:visibility="visible"
         android:text="No Active users hosting a party!"
@@ -67,13 +67,31 @@
     <ListView
         android:id="@+id/userlistview"
         android:layout_width="match_parent"
-
-        android:layout_height="0dp"
+        android:layout_height="532dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="@+id/LoginBackground"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline5" />
+        app:layout_constraintTop_toTopOf="@+id/guideline5"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/TipView"
+        android:layout_width="match_parent"
+        android:layout_height="47dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:text="Note: Click Join again to Re-Sync"
+        android:visibility="gone"
+        android:textSize="20sp"
+        android:textColor="@color/white"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="@+id/LoginBackground"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

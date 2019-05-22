@@ -12,9 +12,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@drawable/background_four"
-        tools:layout_editor_absoluteX="-63dp"
-        tools:layout_editor_absoluteY="0dp" />
+        android:src="@drawable/navy_back_1"
+
+        />
 
     <Button
         android:id="@+id/UploadButton"

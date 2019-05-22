@@ -47,7 +47,7 @@ public class JoinActivity extends AppCompatActivity {
     public long startTime, endTime;
     private String selectedUserID;
     private Boolean proceed = true;
-    private TextView noUserAlert;
+    private TextView noUserAlert, TipView;
     private int count = 0;
     DateFormat simple;
 
@@ -62,6 +62,7 @@ public class JoinActivity extends AppCompatActivity {
         userref = FirebaseDatabase.getInstance().getReference("ActiveUsers");
         userlistview_ = (ListView) findViewById(R.id.userlistview);
         noUserAlert = findViewById(R.id.noUserAlert);
+        TipView = findViewById(R.id.TipView);
     }
 
     @Override
@@ -98,9 +99,12 @@ public class JoinActivity extends AppCompatActivity {
                     if(mediaPlayer != null && mediaPlayer.isPlaying()) {
                         mediaPlayer.stop();
                     }
+                    TipView.setVisibility(View.GONE);
+
                 } else {
                     userlistview_.setVisibility(View.VISIBLE);
                     noUserAlert.setVisibility(View.GONE);
+                    TipView.setVisibility(View.VISIBLE);
                     UserInfoList adapter = new UserInfoList(JoinActivity.this, userlist_);
                     userlistview_.setAdapter(adapter);
                     userlistview_.setOnItemClickListener(new AdapterView.OnItemClickListener() {
