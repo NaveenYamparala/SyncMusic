@@ -83,7 +83,7 @@ public class JoinActivity extends AppCompatActivity {
                             System.out.println("seekDiff value: " + seekDiff);
                             if (seekDiff > 0 && proceed) {
                                 count++;
-                                mediaPlayer.seekTo(Integer.parseInt(activeUsers.getCurrentSeekTime()) + seekDiff/2);
+                                mediaPlayer.seekTo(Integer.parseInt(activeUsers.getCurrentSeekTime())+seekDiff/10);
                             }
                             if (count > 2) {
                                 proceed = false;
@@ -95,6 +95,9 @@ public class JoinActivity extends AppCompatActivity {
                 if (userlist_.isEmpty()) {
                     userlistview_.setVisibility(View.GONE);
                     noUserAlert.setVisibility(View.VISIBLE);
+                    if(mediaPlayer != null && mediaPlayer.isPlaying()) {
+                        mediaPlayer.stop();
+                    }
                 } else {
                     userlistview_.setVisibility(View.VISIBLE);
                     noUserAlert.setVisibility(View.GONE);
@@ -165,22 +168,23 @@ public class JoinActivity extends AppCompatActivity {
             @Override
             public void run() {
 //                String TIME_SERVER = "time-a.nist.gov";
-                startTime = System.currentTimeMillis();
-                String TIME_SERVER = "time.google.com";
-                NTPUDPClient timeClient = new NTPUDPClient();
-                InetAddress inetAddress = null;
-                try {
-                    inetAddress = InetAddress.getByName(TIME_SERVER);
-                } catch (UnknownHostException e) {
-                    e.printStackTrace();
-                }
-                TimeInfo timeInfo = null;
-                try {
-                    timeInfo = timeClient.getTime(inetAddress);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                long returnTime = timeInfo.getMessage().getTransmitTimeStamp().getTime();
+//                startTime = System.currentTimeMillis();
+//                String TIME_SERVER = "time.google.com";
+//                NTPUDPClient timeClient = new NTPUDPClient();
+//                InetAddress inetAddress = null;
+//                try {
+//                    inetAddress = InetAddress.getByName(TIME_SERVER);
+//                } catch (UnknownHostException e) {
+//                    e.printStackTrace();
+//                }
+//                TimeInfo timeInfo = null;
+//                try {
+//                    timeInfo = timeClient.getTime(inetAddress);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+               // long returnTime = timeInfo.getMessage().getTransmitTimeStamp().getTime();
+                long returnTime = System.currentTimeMillis();
                 endTime = System.currentTimeMillis();
                 //System.out.println("Timer running..Delay =" + (endTime -startTime) );
                 if (returnTime >= t) {
