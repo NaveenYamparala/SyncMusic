@@ -86,7 +86,7 @@ public class JoinActivity extends AppCompatActivity {
                                 count++;
                                 mediaPlayer.seekTo(Integer.parseInt(activeUsers.getCurrentSeekTime())+seekDiff/2);// Akash - seekdiff/2
                             }
-                            if (count > 3) {
+                            if (count > 2) {
                                 proceed = false;
                             }
                         }
@@ -149,7 +149,7 @@ public class JoinActivity extends AppCompatActivity {
                     mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                 }
                 mediaPlayer.prepare(); // Preparing audio file, to get data like audio length etc.
-                mediaPlayer.seekTo(Integer.parseInt(selectedItem.getAnticipatedSeekTime()));
+                mediaPlayer.seekTo(Integer.parseInt(selectedItem.getCurrentSeekTime()));
                 long time = simple.parse(selectedItem.getAnticipatedSongStartTime()).getTime();
                 //scheduleTimer(time);
                 mediaPlayer.start();
