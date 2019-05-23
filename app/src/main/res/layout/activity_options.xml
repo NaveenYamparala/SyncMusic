@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@drawable/grey_background"
+        android:src="@drawable/background_five"
         />
 
     <LinearLayout
@@ -30,7 +30,7 @@
             android:layout_marginEnd="30dp"
             android:layout_marginTop="100dp"
             android:layout_marginBottom="50dp"
-
+            android:background="@drawable/trans_white_rectangle"
             android:orientation="vertical"
 
             >
@@ -57,7 +57,7 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="16dp"
-                android:background="@drawable/register_button"
+                android:background="@drawable/register_but"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
                 android:text=" Host a music party"
@@ -70,7 +70,7 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="16dp"
-                android:background="@drawable/register_button"
+                android:background="@drawable/register_but"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
                 android:text=" Join a music party"
@@ -83,7 +83,7 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="16dp"
-                android:background="@drawable/register_button"
+                android:background="@drawable/register_but"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
                 android:text="Sign out"
